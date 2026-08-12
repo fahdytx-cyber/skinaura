@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SKIN AURA — Minecraft Bedrock Creator Platform</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <!-- JSZip CDN for client-side .mcpack zip generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="brand" onclick="switchTab('home')">
+        <span class="brand-logo">✨</span>
+        <span class="brand-name">SKIN AURA</span>
+        <span class="badge-bedrock">BEDROCK</span>
+      </div>
+
+      <button class="hamburger" id="hamburger-btn" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+
+      <nav class="nav-links" id="nav-links">
+        <button class="nav-btn active" data-tab="home" onclick="switchTab('home')">Home</button>
+        <button class="nav-btn" data-tab="pfp" onclick="switchTab('pfp')">🧑‍🎨 PFP Creator</button>
+        <button class="nav-btn" data-tab="pack" onclick="switchTab('pack')">📦 Skin Pack Builder</button>
+        <button class="nav-btn" data-tab="cape" onclick="switchTab('cape')">🦸 Cape Designer</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Notification Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <main class="main-content">
+
+    <!-- HOMEPAGE TAB -->
+    <section id="tab-home" class="tab-content active">
+      <div class="hero">
+        <div class="hero-glow hero-glow-1"></div>
+        <div class="hero-glow hero-glow-2"></div>
+        <div class="hero-content">
+          <span class="hero-tagline">YOUR SKIN. YOUR STYLE.</span>
+          <h1 class="hero-title">CREATE SOMETHING <span class="text-gradient">LEGENDARY.</span></h1>
+          <p class="hero-subtitle">The ultimate studio for Minecraft Bedrock Edition creators. Generate custom profile pictures, craft .mcpack skin packs, and design pixel capes directly in your browser.</p>
+          <div class="hero-cta-group">
+            <button class="btn btn-primary" onclick="switchTab('pfp')">🧑‍🎨 CREATE PFP</button>
+            <button class="btn btn-secondary" onclick="switchTab('pack')">📦 MAKE SKIN PACK</button>
+            <button class="btn btn-tertiary" onclick="switchTab('cape')">🦸 DESIGN CAPE</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card" onclick="switchTab('pfp')">
+          <div class="feature-icon">🧑‍🎨</div>
+          <h3>Bedrock Skin → PFP</h3>
+          <p>Turn your Bedrock skin into a high-resolution, custom Minecraft profile picture with glowing auras, custom poses, backgrounds, and particles.</p>
+          <div class="card-action">Launch Generator &rarr;</div>
+        </div>
+
+        <div class="feature-card" onclick="switchTab('pack')">
+          <div class="feature-icon">📦</div>
+          <h3>Bedrock Skin Pack Maker</h3>
+          <p>Bundle multiple 64x64 or 128x128 Bedrock skins into an installable <code>.mcpack</code> file complete with custom UUID manifests and pack icons.</p>
+          <div class="card-action">Build Pack &rarr;</div>
+        </div>
+
+        <div class="feature-card" onclick="switchTab('cape')">
+          <div class="feature-icon">🦸</div>
+          <h3>Cape Designer</h3>
+          <p>Design pixel-accurate Minecraft capes using custom drawing tools or presets, then seamlessly attach them to your PFP avatar renders.</p>
+          <div class="card-action">Open Editor &rarr;</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PFP CREATOR TAB -->
+    <section id="tab-pfp" class="tab-content">
+      <div class="section-header">
+        <h2>🧑‍🎨 Bedrock Skin Profile Picture Generator</h2>
+        <p>Render your Bedrock skin with dynamic poses, vibrant particle auras, custom capes, and atmospheric backgrounds.</p>
+      </div>
+
+      <div class="editor-layout">
+        <!-- Controls Panel -->
+        <div class="panel controls-panel">
+          
+          <!-- 1. Skin Upload -->
+          <div class="panel-section">
+            <label class="section-title">1. Upload Bedrock Skin</label>
+            <div class="drop-zone" id="pfp-drop-zone">
+              <input type="file" id="pfp-skin-input" accept="image/png" class="file-input">
+              <div class="drop-zone-content">
+                <span class="upload-icon">📁</span>
+                <p>Drag & Drop Bedrock PNG skin here</p>
+                <span class="subtext">Supports 64x64 or 128x128 standard formats</span>
+              </div>
+            </div>
+            <div id="pfp-skin-info" class="skin-info-card hidden">
+              <img id="pfp-skin-thumb" src="" alt="Skin Preview">
+              <div class="skin-meta">
+                <span id="pfp-skin-filename" class="filename">skin.png</span>
+                <span id="pfp-skin-dim" class="badge">64x64</span>
+              </div>
+              <button class="btn-icon btn-danger" onclick="clearPfpSkin()">✕</button>
+            </div>
+          </div>
+
+          <!-- 2. Pose & Orientation -->
+          <div class="panel-section">
+            <label class="section-title">2. Pose & Stance</label>
+            <div class="options-grid grid-3">
+              <button class="opt-btn active" data-group="pose" data-value="standing" onclick="setPfpOption('pose', 'standing')">Standing</button>
+              <button class="opt-btn" data-group="pose" data-value="walking" onclick="setPfpOption('pose', 'walking')">Walking</button>
+              <button class="opt-btn" data-group="pose" data-value="running" onclick="setPfpOption('pose', 'running')">Running</button>
+              <button class="opt-btn" data-group="pose" data-value="pvp" onclick="setPfpOption('pose', 'pvp')">PvP Ready</button>
+              <button class="opt-btn" data-group="pose" data-value="left" onclick="setPfpOption('pose', 'left')">Look Left</button>
+              <button class="opt-btn" data-group="pose" data-value="right" onclick="setPfpOption('pose', 'right')">Look Right</button>
+            </div>
+          </div>
+
+          <!-- 3. Background -->
+          <div class="panel-section">
+            <label class="section-title">3. Background Style</label>
+            <div class="options-grid grid-4">
+              <button class="opt-btn active" data-group="bg" data-value="purple" onclick="setPfpOption('bg', 'purple')">Purple</button>
+              <button class="opt-btn" data-group="bg" data-value="blue" onclick="setPfpOption('bg', 'blue')">Blue</button>
+              <button class="opt-btn" data-group="bg" data-value="galaxy" onclick="setPfpOption('bg', 'galaxy')">Galaxy</button>
+              <button class="opt-btn" data-group="bg" data-value="sunset" onclick="setPfpOption('bg', 'sunset')">Sunset</button>
+              <button class="opt-btn" data-group="bg" data-value="nether" onclick="setPfpOption('bg', 'nether')">Nether</button>
+              <button class="opt-btn" data-group="bg" data-value="end" onclick="setPfpOption('bg', 'end')">The End</button>
+              <button class="opt-btn" data-group="bg" data-value="dark" onclick="setPfpOption('bg', 'dark')">Black</button>
+              <label class="opt-btn btn-custom-upload">
+                Custom
+                <input type="file" id="pfp-bg-input" accept="image/*" class="file-input" onchange="handleCustomBgUpload(event)">
+              </label>
+            </div>
+          </div>
+
+          <!-- 4. Aura Particles -->
+          <div class="panel-section">
+            <label class="section-title">4. Energy Aura</label>
+            <div class="options-grid grid-4">
+              <button class="opt-btn active" data-group="aura" data-value="none" onclick="setPfpOption('aura', 'none')">None</button>
+              <button class="opt-btn" data-group="aura" data-value="fire" onclick="setPfpOption('aura', 'fire')">🔥 Fire</button>
+              <button class="opt-btn" data-group="aura" data-value="lightning" onclick="setPfpOption('aura', 'lightning')">⚡ Lightning</button>
+              <button class="opt-btn" data-group="aura" data-value="ice" onclick="setPfpOption('aura', 'ice')">❄️ Ice</button>
+              <button class="opt-btn" data-group="aura" data-value="shadow" onclick="setPfpOption('aura', 'shadow')">🌑 Shadow</button>
+              <button class="opt-btn" data-group="aura" data-value="galaxy" onclick="setPfpOption('aura', 'galaxy')">🌌 Galaxy</button>
+              <button class="opt-btn" data-group="aura" data-value="toxic" onclick="setPfpOption('aura', 'toxic')">☠️ Toxic</button>
+              <button class="opt-btn" data-group="aura" data-value="sakura" onclick="setPfpOption('aura', 'sakura')">🌸 Sakura</button>
+            </div>
+          </div>
+
+          <!-- 5. Visual Post-Effects -->
+          <div class="panel-section">
+            <label class="section-title">5. Post Effects</label>
+            <div class="checkbox-group">
+              <label class="checkbox-label"><input type="checkbox" id="fx-glow" checked onchange="renderPfp()"> Outer Glow</label>
+              <label class="checkbox-label"><input type="checkbox" id="fx-outline" onchange="renderPfp()"> Character Outline</label>
+              <label class="checkbox-label"><input type="checkbox" id="fx-vignette" checked onchange="renderPfp()"> Dark Vignette</label>
+              <label class="checkbox-label"><input type="checkbox" id="fx-shadow" checked onchange="renderPfp()"> Drop Shadow</label>
+            </div>
+          </div>
+
+          <!-- 6. Cape Selection -->
+          <div class="panel-section">
+            <label class="section-title">6. Overlay Cape</label>
+            <div class="cape-picker-row">
+              <select id="pfp-cape-select" class="form-select" onchange="setPfpOption('cape', this.value)">
+                <option value="none">No Cape</option>
+                <option value="designed">Use Current Custom Cape (from Cape Designer)</option>
+                <option value="preset-fire">Preset: Fire Core</option>
+                <option value="preset-galaxy">Preset: Cosmic Void</option>
+                <option value="preset-royal">Preset: Royal Crown</option>
+              </select>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Preview Canvas Panel -->
+        <div class="panel preview-panel">
+          <div class="preview-container">
+            <canvas id="pfp-canvas" width="512" height="512"></canvas>
+            <div id="pfp-loading" class="canvas-loading hidden">
+              <div class="spinner"></div>
+              <span>Rendering PFP...</span>
+            </div>
+          </div>
+          <div class="preview-actions">
+            <button class="btn btn-primary btn-full" onclick="downloadPFP()">📥 DOWNLOAD PFP (HD PNG)</button>
+          </div>
+          <p class="disclaimer-text">Renders a high-resolution 512x512 PNG suitable for Discord, YouTube, or avatar profiles.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- BEDROCK SKIN PACK MAKER TAB -->
+    <section id="tab-pack" class="tab-content">
+      <div class="section-header">
+        <h2>📦 Bedrock Skin Pack Generator</h2>
+        <p>Combine multiple Minecraft Bedrock skins into an official, ready-to-import <code>.mcpack</code> archive complete with custom manifests and UUID keys.</p>
+      </div>
+
+      <div class="editor-layout">
+        <!-- Skin List & Upload Panel -->
+        <div class="panel main-pack-panel">
+          <div class="panel-section">
+            <div class="section-header-flex">
+              <label class="section-title">Uploaded Skins (<span id="pack-skin-count">0</span>)</label>
+              <button class="btn btn-secondary btn-sm" onclick="document.getElementById('pack-skins-input').click()">+ ADD MORE SKINS</button>
+            </div>
+
+            <div class="drop-zone" id="pack-drop-zone">
+              <input type="file" id="pack-skins-input" accept="image/png" multiple class="file-input">
+              <div class="drop-zone-content">
+                <span class="upload-icon">📦</span>
+                <p>Drag & Drop multiple Bedrock PNG skins here</p>
+                <span class="subtext">Select multiple files at once. Must be 64x64 or 128x128 PNGs.</span>
+              </div>
+            </div>
+
+            <div id="pack-skins-list" class="skins-grid">
+              <!-- Dynamically populated skin cards -->
+              <div class="empty-state">
+                <span>📁</span>
+                <p>No skins added yet. Upload your first PNG skin above!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metadata & Export Settings -->
+        <div class="panel pack-sidebar-panel">
+          <div class="panel-section">
+            <label class="section-title">Pack Metadata</label>
+
+            <div class="form-group">
+              <label for="pack-name">Pack Name *</label>
+              <input type="text" id="pack-name" class="form-input" value="Skin Aura Custom Pack" placeholder="My Awesome Pack">
+            </div>
+
+            <div class="form-group">
+              <label for="pack-creator">Creator Name *</label>
+              <input type="text" id="pack-creator" class="form-input" value="Skin Aura Creator" placeholder="Your GamerTag">
+            </div>
+
+            <div class="form-group">
+              <label for="pack-desc">Pack Description</label>
+              <textarea id="pack-desc" class="form-input form-textarea" rows="3" placeholder="Created with Skin Aura Studio">Custom skin pack created with Skin Aura Studio.</textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Pack Icon (Thumbnail)</label>
+              <div class="pack-icon-picker">
+                <img id="pack-icon-preview" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAPUlEQVR42u3BAQEAAACCIP+vbthANQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC8GygAB3L26qgAAAABJRU5ErkJggg==" alt="Pack Icon">
+                <label class="btn btn-secondary btn-sm">
+                  Upload Icon
+                  <input type="file" id="pack-icon-input" accept="image/png" class="file-input" onchange="handlePackIconUpload(event)">
+                </label>
+              </div>
+              <span class="subtext">Default fallback icon used if left unchanged.</span>
+            </div>
+          </div>
+
+          <div class="panel-section">
+            <label class="section-title">Bedrock Compatibility Check</label>
+            <div class="info-box">
+              <span class="info-icon">ℹ️</span>
+              <p>Generates a valid Bedrock <code>manifest.json</code> with auto-generated Version 4 UUIDs and a formatted <code>skins.json</code> mapping file.</p>
+            </div>
+            <button class="btn btn-primary btn-full" onclick="generateAndExportPack()">🔨 BUILD & DOWNLOAD .MCPACK</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CAPE DESIGNER TAB -->
+    <section id="tab-cape" class="tab-content">
+      <div class="section-header">
+        <h2>🦸 Bedrock Cape Designer</h2>
+        <p>Paint custom pixel-art capes. Export PNGs or apply directly to your skin in the PFP Creator.</p>
+      </div>
+
+      <div class="notice-banner">
+        <span class="notice-icon">⚠️</span>
+        <div class="notice-text">
+          <strong>Important Bedrock Cape Note:</strong> Custom capes designed here are primarily for <strong>PFP creation</strong> and custom resource/behavior pack development. In official vanilla Bedrock multiplayer servers, custom capes are strictly regulated by Minecraft/Mojang marketplace permissions.
+        </div>
+      </div>
+
+      <div class="editor-layout">
+        <!-- Tools & Canvas -->
+        <div class="panel cape-editor-panel">
+          
+          <div class="cape-toolbar">
+            <div class="tool-group">
+              <button class="tool-btn active" id="tool-pencil" title="Pencil" onclick="setCapeTool('pencil')">✏️ Pencil</button>
+              <button class="tool-btn" id="tool-eraser" title="Eraser" onclick="setCapeTool('eraser')">🧹 Eraser</button>
+              <button class="tool-btn" id="tool-fill" title="Bucket Fill" onclick="setCapeTool('fill')">🪣 Fill</button>
+            </div>
+
+            <div class="tool-group">
+              <label for="cape-color-picker" class="color-picker-wrapper" title="Color Picker">
+                <input type="color" id="cape-color-picker" value="#9933ff" onchange="updateCapeColor(this.value)">
+                <span class="color-preview-bar" id="color-preview-bar"></span>
+              </label>
+            </div>
+
+            <div class="tool-group">
+              <button class="btn btn-secondary btn-sm" onclick="undoCape()">↩️ Undo</button>
+              <button class="btn btn-secondary btn-sm" onclick="redoCape()">↪️ Redo</button>
+              <button class="btn btn-secondary btn-sm" onclick="clearCapeCanvas()">🗑️ Clear</button>
+            </div>
+          </div>
+
+          <div class="cape-canvas-container">
+            <div class="canvas-wrapper">
+              <span class="canvas-label">Front (10x16 Cape View)</span>
+              <canvas id="cape-pixel-canvas" width="320" height="512"></canvas>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Presets & Actions Sidebar -->
+        <div class="panel cape-sidebar-panel">
+          <div class="panel-section">
+            <label class="section-title">Cape Presets</label>
+            <div class="options-grid grid-2">
+              <button class="opt-btn" onclick="loadCapePreset('fire')">🔥 Fire Core</button>
+              <button class="opt-btn" onclick="loadCapePreset('lightning')">⚡ Lightning</button>
+              <button class="opt-btn" onclick="loadCapePreset('galaxy')">🌌 Galaxy</button>
+              <button class="opt-btn" onclick="loadCapePreset('shadow')">🌑 Shadow</button>
+              <button class="opt-btn" onclick="loadCapePreset('crystal')">💎 Crystal</button>
+              <button class="opt-btn" onclick="loadCapePreset('royal')">👑 Royal Crown</button>
+              <button class="opt-btn" onclick="loadCapePreset('dragon')">🐉 Dragon</button>
+              <button class="opt-btn" onclick="loadCapePreset('purple')">🟣 Purple Aura</button>
+            </div>
+          </div>
+
+          <div class="panel-section">
+            <label class="section-title">File Operations</label>
+            <div class="action-stack">
+              <label class="btn btn-secondary btn-full">
+                📥 Import Custom Cape PNG
+                <input type="file" id="cape-import-input" accept="image/png" class="file-input" onchange="importCapePNG(event)">
+              </label>
+              <button class="btn btn-primary btn-full" onclick="downloadCapePNG()">💾 Export Cape PNG (64x32)</button>
+              <button class="btn btn-tertiary btn-full" onclick="applyCapeToPfp()">✨ Send Cape to PFP Creator</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <span class="brand-name">SKIN AURA</span>
+        <span class="tagline">Your skin. Your style.</span>
+      </div>
+      <p class="footer-disclaimer">Skin Aura is a local client-side creator utility. Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
